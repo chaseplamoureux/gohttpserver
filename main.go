@@ -9,6 +9,7 @@ import (
 	"sync/atomic"
 
 	"github.com/chaseplamoureux/gohttpserver/internal/database"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
@@ -18,10 +19,13 @@ type apiConfig struct {
 }
 
 func main() {
+	godotenv.Load()
 	dbURL := os.Getenv("DB_URL")
 	db ,err := sql.Open("postgres", dbURL)
+	fmt.Println(dbURL)
 	if err != nil {
 		log.Fatalf("Could not connect to DB. %s\n", err)
+		return
 	}
 	dbQueries := database.New(db)
 
