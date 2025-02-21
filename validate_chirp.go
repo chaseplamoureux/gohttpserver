@@ -23,7 +23,7 @@ func (cfg *apiConfig) handlerChirp(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&params)
 	fmt.Println(params.Body)
 	if err != nil {
-		errorResponse(w, 500, "Couldnt decode paramters", err)
+		errorResponse(w, 500, "Couldnt decode parameters", err)
 		return
 	}
 
@@ -31,8 +31,11 @@ func (cfg *apiConfig) handlerChirp(w http.ResponseWriter, r *http.Request) {
 		params.Body = profanityCheck(params.Body)
 		responseJSON(w, 200, success{CleanedBody: params.Body})
 		return
+	} else if len(params.Body) > 140 {
+		errorResponse(w, 400, "Chirp is too long. Must be less than 140 characters", nil)
+	} else {
+		errorResponse(w, 500, "Error has occurred", nil)
 	}
-	errorResponse(w, 400, "Chirp is too long", nil)
 
 }
 
