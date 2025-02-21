@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"slices"
+	"strings"
 )
 
 func (cfg *apiConfig) handlerChirp(w http.ResponseWriter, r *http.Request) {
@@ -13,7 +15,7 @@ func (cfg *apiConfig) handlerChirp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type success struct {
-		Valid bool `json:"valid"`
+		CleanedBody string `json:"cleaned_body"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -26,9 +28,22 @@ func (cfg *apiConfig) handlerChirp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(params.Body) > 0 && len(params.Body) <= 140 {
-		responseJSON(w, 200, success{Valid: true})
+		params.Body = profanityCheck(params.Body)
+		responseJSON(w, 200, success{CleanedBody: params.Body})
 		return
 	}
 	errorResponse(w, 400, "Chirp is too long", nil)
 
+}
+
+func profanityCheck(body string) string {
+	badWords := []string{"kerfuffle", "sharbert", "fornax"}
+	words := strings.Split(body, " ")
+
+	for i, word := range words {
+		if slices.Contains(badWords, strings.ToLower(word)) {
+			words[i] = "****"
+		}
+	}
+	return strings.Join(words, " ")
 }
