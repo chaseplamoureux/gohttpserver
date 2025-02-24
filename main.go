@@ -37,7 +37,8 @@ func main() {
 	mux.HandleFunc("GET /api/healthz", healthzHandler)
 	mux.HandleFunc("GET /admin/metrics", apiCfg.handlerMetrics)
 	mux.HandleFunc("POST /admin/reset", apiCfg.handlerReset)
-	mux.HandleFunc("POST /api/validate_chirp", apiCfg.handlerChirp)
+	mux.HandleFunc("POST /api/users", apiCfg.handlerUser)
+	mux.HandleFunc("POST /api/chirps", apiCfg.handlerUserChirp)
 
 	s := &http.Server{
 		Addr:    ":8080",
@@ -78,4 +79,5 @@ func (cfg *apiConfig) handlerReset(w http.ResponseWriter, r *http.Request) {
 	cfg.fileserverHits.Store(0)
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Hits reset to 0"))
+	cfg.db.DeleteUsers(r.Context())
 }
