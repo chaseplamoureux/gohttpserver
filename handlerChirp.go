@@ -74,3 +74,23 @@ func profanityCheck(body string) string {
 	}
 	return strings.Join(words, " ")
 }
+
+func (cfg *apiConfig) handlerGetChirps(w http.ResponseWriter, r *http.Request) {
+	dbChirps, err := cfg.db.GetChirps(r.Context())
+	if err != nil {
+		errorResponse(w, 500, "Could not retreive chirps from server", err)
+		return
+	}
+	response := []Chirp{}
+
+	for _, dbChirp := range dbChirps {
+		response = append(response, Chirp{
+			Id:        dbChirp.ID,
+			CreatedAt: dbChirp.CreatedAt,
+			UpdatedAt: dbChirp.UpdatedAt,
+			Body:      dbChirp.Body,
+			UserId:    dbChirp.UserID,
+		})
+	}
+	responseJSON(w, 200, response)
+}
