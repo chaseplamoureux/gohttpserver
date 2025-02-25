@@ -94,3 +94,22 @@ func (cfg *apiConfig) handlerGetChirps(w http.ResponseWriter, r *http.Request) {
 	}
 	responseJSON(w, 200, response)
 }
+
+func (cfg *apiConfig) handlerGetChirp(w http.ResponseWriter, r *http.Request) {
+	chirpId, err := uuid.Parse(r.PathValue("chirpID"))
+	if err != nil {
+		errorResponse(w, http.StatusBadRequest, "Provided ID is not a valid UUID", err)
+	}
+	fmt.Println(chirpId)
+	dbChirp, err := cfg.db.GetChirp(r.Context(), chirpId)
+	if err != nil {
+		errorResponse(w, 404, "chirp with ID not found", err)
+	}
+	responseJSON(w, 200, Chirp{
+		Id:        dbChirp.ID,
+		CreatedAt: dbChirp.CreatedAt,
+		UpdatedAt: dbChirp.UpdatedAt,
+		Body:      dbChirp.Body,
+		UserId:    dbChirp.UserID,
+	})
+}
