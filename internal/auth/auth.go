@@ -3,6 +3,8 @@ package auth
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"regexp"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -78,4 +80,17 @@ func ValidateJWT(tokenString, tokenSecret string) (uuid.UUID, error) {
 		return uuid.Nil, fmt.Errorf("invalid user ID: %w", err)
 	}
 	return id, nil
+}
+
+func GetBearerToken(headers http.Header) (string, error) {
+	fmt.Println(headers)
+	authHeader := headers.Get("Authorization")
+	fmt.Println(authHeader)
+	pattern := regexp.MustCompile(`Bearer (.+?)$`) 
+	matches := pattern.FindStringSubmatch(authHeader)
+	if len(matches) == 0 {
+		return "", errors.New("authorization header was not set correctly")
+	}
+	fmt.Println(matches[1])
+	return matches[1], nil
 }

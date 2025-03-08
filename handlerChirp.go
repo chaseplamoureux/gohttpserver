@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/chaseplamoureux/gohttpserver/internal/auth"
 	"github.com/chaseplamoureux/gohttpserver/internal/database"
 	"github.com/google/uuid"
 )
@@ -24,16 +25,25 @@ func (cfg *apiConfig) handlerUserChirp(w http.ResponseWriter, r *http.Request) {
 	// this function needs to take in a post request and process the data in the body.
 	type parameters struct {
 		Body   string    `json:"body"`
-		UserId uuid.UUID `json:"user_id"`
 	}
 
 	type response struct {
 		Chirp
 	}
+	jwt, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		errorResponse(w, 401, "No auth token present", err)
+		return
+	}
+	userId, err := auth.ValidateJWT(jwt, cfg.jwt)
+	if err != nil {
+		errorResponse(w, 401, "Could not validate JWT", err)
+		return
+	}
 
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
-	err := decoder.Decode(&params)
+	err = decoder.Decode(&params)
 	fmt.Println(params.Body)
 	if err != nil {
 		errorResponse(w, 500, "Couldnt decode parameters", err)
@@ -42,7 +52,7 @@ func (cfg *apiConfig) handlerUserChirp(w http.ResponseWriter, r *http.Request) {
 
 	if len(params.Body) > 0 && len(params.Body) <= 140 {
 		params.Body = profanityCheck(params.Body)
-		dbParams := database.CreateChirpParams{Body: params.Body, UserID: params.UserId}
+		dbParams := database.CreateChirpParams{Body: params.Body, UserID: userId}
 		dbResponse, err := cfg.db.CreateChirp(r.Context(), dbParams)
 		if err != nil {
 			errorResponse(w, 500, "Could not save new chirp", err)
