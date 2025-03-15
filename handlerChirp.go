@@ -24,17 +24,19 @@ type Chirp struct {
 func (cfg *apiConfig) handlerUserChirp(w http.ResponseWriter, r *http.Request) {
 	// this function needs to take in a post request and process the data in the body.
 	type parameters struct {
-		Body   string    `json:"body"`
+		Body string `json:"body"`
 	}
 
 	type response struct {
 		Chirp
 	}
 	jwt, err := auth.GetBearerToken(r.Header)
+
 	if err != nil {
 		errorResponse(w, 401, "No auth token present", err)
 		return
 	}
+	fmt.Printf("JWT: %s\n", jwt)
 	userId, err := auth.ValidateJWT(jwt, cfg.jwt)
 	if err != nil {
 		errorResponse(w, 401, "Could not validate JWT", err)
