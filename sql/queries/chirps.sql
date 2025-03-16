@@ -19,6 +19,10 @@ SELECT *
 FROM chirps
 where id = $1;
 
+-- name: DeleteChirp :exec
+DELETE FROM chirps
+WHERE id = $1;
+
 -- name: DeleteChirps :exec
 DELETE FROM chirps
 WHERE id IS NOT NULL;

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -116,6 +117,7 @@ func (cfg *apiConfig) handlerGetChirp(w http.ResponseWriter, r *http.Request) {
 	dbChirp, err := cfg.db.GetChirp(r.Context(), chirpId)
 	if err != nil {
 		errorResponse(w, 404, "chirp with ID not found", err)
+		return
 	}
 	responseJSON(w, 200, Chirp{
 		Id:        dbChirp.ID,
@@ -124,4 +126,40 @@ func (cfg *apiConfig) handlerGetChirp(w http.ResponseWriter, r *http.Request) {
 		Body:      dbChirp.Body,
 		UserId:    dbChirp.UserID,
 	})
+}
+
+func (cfg *apiConfig) handlerDeleteChirp(w http.ResponseWriter, r *http.Request) {
+	bearerToken, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		errorResponse(w, 401, "No bearer auth token in request headers", err)
+		return
+	}
+
+	userId, err := auth.ValidateJWT(bearerToken, cfg.jwt)
+	if err != nil {
+		errorResponse(w, 401, "Could not validate JWT", err)
+		return
+	}
+	chirpId, err := uuid.Parse(r.PathValue("chirpID"))
+	if err != nil {
+		errorResponse(w, http.StatusBadRequest, "Provided ID is not a valid UUID", err)
+		return
+	}
+	dbChirp, err := cfg.db.GetChirp(r.Context(), chirpId)
+	if err != nil {
+		errorResponse(w, 404, "chirp with ID not found", err)
+		return
+	}
+
+	if dbChirp.UserID != userId {
+		errorResponse(w, 403, "Invalid permissions", err)
+		return
+	}
+	err = cfg.db.DeleteChirp(context.Background(), dbChirp.ID)
+	if err != nil {
+		errorResponse(w, 404, "chirp not found", err)
+		return
+	}
+	responseJSON(w, 204, nil)
+
 }

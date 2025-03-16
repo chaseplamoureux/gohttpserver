@@ -27,7 +27,7 @@ func (cfg *apiConfig) handlerRefresh(w http.ResponseWriter, r *http.Request) {
 	if tokenInfo.ExpiresAt.Before(time.Now().UTC()) {
 		errorResponse(w, 401, "token expired. Unauthorized", err)
 	}
-	if tokenInfo.RevokedAt.Valid && tokenInfo.RevokedAt.Time.Before(time.Now()) {
+	if tokenInfo.RevokedAt.Valid && tokenInfo.RevokedAt.Time.Before(time.Now().UTC()) {
 		errorResponse(w, 401, "token expired. Unauthorized", err)
 	}
 	newAccessToken, err := auth.MakeJWT(tokenInfo.UserID, cfg.jwt,time.Hour)
