@@ -14,10 +14,11 @@ import (
 )
 
 type User struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Email     string    `json:"email"`
+	ID         uuid.UUID `json:"id"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
+	Email      string    `json:"email"`
+	IsChirpyRed bool      `json:"is_chirpy_red"`
 }
 
 func (cfg *apiConfig) handlerUser(w http.ResponseWriter, r *http.Request) {
@@ -53,10 +54,11 @@ func (cfg *apiConfig) handlerUser(w http.ResponseWriter, r *http.Request) {
 
 	responseJSON(w, 201, response{
 		User: User{
-			ID:        newUser.ID,
-			CreatedAt: newUser.CreatedAt,
-			UpdatedAt: newUser.UpdatedAt,
-			Email:     newUser.Email,
+			ID:         newUser.ID,
+			CreatedAt:  newUser.CreatedAt,
+			UpdatedAt:  newUser.UpdatedAt,
+			Email:      newUser.Email,
+			IsChirpyRed: newUser.IsChirpyRed.Bool,
 		},
 	})
 }
@@ -105,10 +107,11 @@ func (cfg *apiConfig) handlerUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	responseJSON(w, 200, response{
 		User: User{
-			ID:        updatedUser.ID,
-			CreatedAt: updatedUser.CreatedAt,
-			UpdatedAt: updatedUser.UpdatedAt,
-			Email:     updatedUser.Email,
+			ID:         updatedUser.ID,
+			CreatedAt:  updatedUser.CreatedAt,
+			UpdatedAt:  updatedUser.UpdatedAt,
+			Email:      updatedUser.Email,
+			IsChirpyRed: updatedUser.IsChirpyRed.Bool,
 		},
 	})
 

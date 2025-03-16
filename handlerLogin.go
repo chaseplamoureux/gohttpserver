@@ -12,8 +12,8 @@ import (
 
 func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
-		Email            string `json:"email"`
-		Password         string `json:"password"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
 
 	type response struct {
@@ -49,13 +49,14 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cfg.db.CreateRefreshToken(context.Background(), database.CreateRefreshTokenParams{Token: refreshToken, UserID: user.ID, ExpiresAt: time.Now().UTC().Add(time.Hour *24 * 60)})
+	cfg.db.CreateRefreshToken(context.Background(), database.CreateRefreshTokenParams{Token: refreshToken, UserID: user.ID, ExpiresAt: time.Now().UTC().Add(time.Hour * 24 * 60)})
 
 	responseJSON(w, 200, response{User: User{
-		ID:        user.ID,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-		Email:     user.Email,
+		ID:         user.ID,
+		CreatedAt:  user.CreatedAt,
+		UpdatedAt:  user.UpdatedAt,
+		Email:      user.Email,
+		IsChirpyRed: user.IsChirpyRed.Bool,
 	},
 		Token:        accessToken,
 		RefreshToken: refreshToken,
